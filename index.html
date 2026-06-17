@@ -11,116 +11,32 @@
     <h1 class="text-3xl font-bold text-blue-700 mb-2">Airborne Production</h1>
     <h2 class="text-xl text-gray-600 mb-8">Miss West Virginia 2026 Hours Tracker</h2>
 
-    <!-- Log Hours Form -->
+    <!-- Embedded Google Form -->
     <div class="bg-white rounded-xl shadow p-6 mb-8">
       <h3 class="text-lg font-semibold mb-4">Log Your Hours</h3>
-      <form id="hoursForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium mb-1">Your Name</label>
-          <select id="name" required class="w-full border rounded-lg p-3">
-            <option value="">— Select Name —</option>
-            <option value="Patty Beall">Patty Beall</option>
-            <option value="Jonathan Harbaugh">Jonathan Harbaugh</option>
-            <option value="Aiden Ruiz">Aiden Ruiz</option>
-            <option value="Andrew Hurley">Andrew Hurley</option>
-            <option value="Kailey Ruiz">Kailey Ruiz</option>
-            <option value="Isaac Brown">Isaac Brown</option>
-            <option value="Devon Ayers">Devon Ayers</option>
-            <option value="Jordan Canby">Jordan Canby</option>
-            <option value="Allen Hurley">Allen Hurley</option>
-            <option value="Josh Jordan">Josh Jordan</option>
-            <option value="Evan DeGraw">Evan DeGraw</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-1">Date</label>
-          <input type="date" id="date" required class="w-full border rounded-lg p-3">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-1" id="hoursLabel">Hours for [Day]</label>
-          <input type="number" id="hours" step="0.25" min="0" required class="w-full border rounded-lg p-3" placeholder="e.g. 5.5">
-        </div>
-
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium mb-1">Role / Notes</label>
-          <input type="text" id="notes" class="w-full border rounded-lg p-3" placeholder="Camera Blocking, Prelim Night 1, etc.">
-        </div>
-
-        <button type="submit" id="submitBtn" class="md:col-span-2 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700">
-          Submit Hours
-        </button>
-      </form>
+      <iframe 
+        src="https://forms.gle/5Yoj7GxaCCtbLAMW7" 
+        width="100%" 
+        height="800" 
+        frameborder="0" 
+        class="rounded-lg">
+      </iframe>
     </div>
 
-    <!-- Personal Totals -->
+    <!-- Running Totals Placeholder -->
     <div class="bg-white rounded-xl shadow p-6">
       <h3 class="text-lg font-semibold mb-4">Your Running Total</h3>
-      <div id="personalTotal" class="text-4xl font-bold text-green-600">0.0</div>
-      <p class="text-sm text-gray-500">hours this event</p>
-      <div id="history" class="mt-6"></div>
+      <p class="text-gray-600">After submitting via the form above, check the linked sheet for totals:</p>
+      <a href="https://docs.google.com/spreadsheets/d/1Et7bNx59DoekXl82ejr3LDMO9B0bq6MfGL1TBS0flrY/edit?resourcekey=&gid=584041671#gid=584041671" 
+         target="_blank"
+         class="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        View Full Team Hours Sheet →
+      </a>
     </div>
 
-    <div class="mt-8 text-center text-xs text-gray-500">
-      <p>Replace <code>WEB_APP_URL</code> in the code with your Apps Script URL</p>
+    <div class="mt-8 text-center text-sm text-gray-500">
+      Form responses go directly to your Google Sheet • Share the Sheet view-only link with the team for running totals.
     </div>
   </div>
-
-  <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbythHwJ2tjLMPWpxXgB4mL1q14Dtol5_9b959BFKUFWkK8skbqqmRjEseRlLLZoHOKPmg/exec"; // ← UPDATE THIS
-
-    const dateInput = document.getElementById('date');
-    const hoursLabel = document.getElementById('hoursLabel');
-
-    function updateDayLabel() {
-      const val = dateInput.value;
-      if (!val) {
-        hoursLabel.textContent = "Hours for [Day]";
-        return;
-      }
-      const date = new Date(val);
-      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      hoursLabel.textContent = `Hours for ${days[date.getDay()]}`;
-    }
-
-    dateInput.addEventListener('change', updateDayLabel);
-
-    document.getElementById('hoursForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.textContent = "Submitting...";
-
-      const data = {
-        name: document.getElementById('name').value,
-        date: document.getElementById('date').value,
-        hours: parseFloat(document.getElementById('hours').value),
-        notes: document.getElementById('notes').value
-      };
-
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const result = await response.json();
-        if (result.status === "success") {
-          alert("Hours logged successfully!");
-          e.target.reset();
-          updateDayLabel();
-        } else {
-          alert("Error: " + (result.message || "Unknown error"));
-        }
-      } catch (err) {
-        alert("Submission failed. Check console or try again.");
-        console.error(err);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Submit Hours";
-      }
-    });
-  </script>
 </body>
 </html>
