@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Airborne Miss WV 2026 • Hours Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
   <div class="max-w-4xl mx-auto p-6">
@@ -16,7 +15,6 @@
     <div class="bg-white rounded-xl shadow p-6 mb-8">
       <h3 class="text-lg font-semibold mb-4">Log Your Hours</h3>
       <form id="hoursForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
         <div class="md:col-span-2">
           <label class="block text-sm font-medium mb-1">Your Name</label>
           <select id="name" required class="w-full border rounded-lg p-3">
@@ -46,11 +44,11 @@
         </div>
 
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium mb-1">Role / Notes (e.g. Camera Blocking, General Rehearsal, Prelim Night 1)</label>
-          <input type="text" id="notes" class="w-full border rounded-lg p-3" placeholder="Optional notes">
+          <label class="block text-sm font-medium mb-1">Role / Notes</label>
+          <input type="text" id="notes" class="w-full border rounded-lg p-3" placeholder="Camera Blocking, Prelim Night 1, etc.">
         </div>
 
-        <button type="submit" class="md:col-span-2 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700">
+        <button type="submit" id="submitBtn" class="md:col-span-2 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700">
           Submit Hours
         </button>
       </form>
@@ -61,51 +59,67 @@
       <h3 class="text-lg font-semibold mb-4">Your Running Total</h3>
       <div id="personalTotal" class="text-4xl font-bold text-green-600">0.0</div>
       <p class="text-sm text-gray-500">hours this event</p>
-      <div id="history" class="mt-4 text-sm"></div>
+      <div id="history" class="mt-6"></div>
     </div>
 
-    <div class="mt-8 text-center text-sm text-gray-500">
-      <p>Data is currently saved locally (for demo). We'll connect to Google Sheets next.</p>
+    <div class="mt-8 text-center text-xs text-gray-500">
+      <p>Replace <code>WEB_APP_URL</code> in the code with your Apps Script URL</p>
     </div>
   </div>
 
   <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbythHwJ2tjLMPWpxXgB4mL1q14Dtol5_9b959BFKUFWkK8skbqqmRjEseRlLLZoHOKPmg/exec"; // ← UPDATE THIS
+
     const dateInput = document.getElementById('date');
     const hoursLabel = document.getElementById('hoursLabel');
 
-    // Update label with day of week when date changes
     function updateDayLabel() {
-      const dateVal = dateInput.value;
-      if (!dateVal) {
+      const val = dateInput.value;
+      if (!val) {
         hoursLabel.textContent = "Hours for [Day]";
         return;
       }
-      const date = new Date(dateVal);
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const date = new Date(val);
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
       hoursLabel.textContent = `Hours for ${days[date.getDay()]}`;
     }
 
     dateInput.addEventListener('change', updateDayLabel);
 
-    // Form submission (currently localStorage demo)
-    document.getElementById('hoursForm').addEventListener('submit', (e) => {
+    document.getElementById('hoursForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const name = document.getElementById('name').value;
-      const date = document.getElementById('date').value;
-      const hours = parseFloat(document.getElementById('hours').value);
-      const notes = document.getElementById('notes').value;
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
 
-      if (!name || !date || !hours) return;
+      const data = {
+        name: document.getElementById('name').value,
+        date: document.getElementById('date').value,
+        hours: parseFloat(document.getElementById('hours').value),
+        notes: document.getElementById('notes').value
+      };
 
-      // Simple local storage demo (we'll replace with Google Sheets)
-      let records = JSON.parse(localStorage.getItem('misswv_hours') || '[]');
-      records.push({ name, date, hours, notes });
-      localStorage.setItem('misswv_hours', JSON.stringify(records));
-
-      alert(`Logged ${hours} hours for ${name} on ${date}`);
-      e.target.reset();
-      updateDayLabel(); // reset label
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          alert("Hours logged successfully!");
+          e.target.reset();
+          updateDayLabel();
+        } else {
+          alert("Error: " + (result.message || "Unknown error"));
+        }
+      } catch (err) {
+        alert("Submission failed. Check console or try again.");
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Submit Hours";
+      }
     });
   </script>
 </body>
