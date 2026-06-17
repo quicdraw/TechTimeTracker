@@ -14,29 +14,74 @@
     <!-- Embedded Google Form -->
     <div class="bg-white rounded-xl shadow p-6 mb-8">
       <h3 class="text-lg font-semibold mb-4">Log Your Hours</h3>
-      <iframe 
-        src="https://forms.gle/5Yoj7GxaCCtbLAMW7" 
-        width="100%" 
-        height="800" 
-        frameborder="0" 
-        class="rounded-lg">
-      </iframe>
+      <iframe src="https://forms.gle/5Yoj7GxaCCtbLAMW7" 
+              width="100%" height="800" frameborder="0" class="rounded-lg"></iframe>
     </div>
 
-    <!-- Running Totals Placeholder -->
+    <!-- Per-Position Daily Hours -->
     <div class="bg-white rounded-xl shadow p-6">
-      <h3 class="text-lg font-semibold mb-4">Your Running Total</h3>
-      <p class="text-gray-600">After submitting via the form above, check the linked sheet for totals:</p>
-      <a href="https://docs.google.com/spreadsheets/d/1Et7bNx59DoekXl82ejr3LDMO9B0bq6MfGL1TBS0flrY/edit?resourcekey=&gid=584041671#gid=584041671" 
-         target="_blank"
-         class="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-        View Full Team Hours Sheet →
-      </a>
+      <h3 class="text-lg font-semibold mb-4">Hours by Day (Per Position)</h3>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">Select Position</label>
+        <select id="positionSelect" class="w-full border rounded-lg p-3 text-lg">
+          <option value="">— Select Position —</option>
+          <option value="Camera 1">Camera 1</option>
+          <option value="Camera 2">Camera 2</option>
+          <option value="Camera 3">Camera 3</option>
+          <option value="Camera 4">Camera 4</option>
+          <option value="Gimbal">Gimbal</option>
+          <option value="Cells">Cells</option>
+          <option value="LED Control">LED Control</option>
+          <option value="Lights">Lights</option>
+          <option value="Sound">Sound</option>
+          <option value="Tracks/Computer">Tracks/Computer</option>
+          <option value="Video Switcher">Video Switcher</option>
+        </select>
+      </div>
+
+      <div id="dailyHours" class="min-h-[200px] text-sm">
+        <p class="text-gray-500">Select a position above to see daily hours.</p>
+      </div>
     </div>
 
     <div class="mt-8 text-center text-sm text-gray-500">
-      Form responses go directly to your Google Sheet • Share the Sheet view-only link with the team for running totals.
+      <p>Form responses go directly to your Google Sheet.</p>
     </div>
   </div>
+
+  <script>
+    // Demo data - update with real values from your Sheet
+    const demoData = {
+      "Camera 1": { "2026-06-16": 5.5, "2026-06-17": 6 },
+      "Video Switcher": { "2026-06-17": 8 }
+      // Add more as data comes in
+    };
+
+    const select = document.getElementById('positionSelect');
+    const dailyDiv = document.getElementById('dailyHours');
+
+    select.addEventListener('change', () => {
+      const position = select.value;
+      if (!position) {
+        dailyDiv.innerHTML = `<p class="text-gray-500">Select a position above to see daily hours.</p>`;
+        return;
+      }
+
+      const data = demoData[position] || {};
+      let html = `<p class="font-medium mb-3">${position}</p>`;
+      
+      if (Object.keys(data).length === 0) {
+        html += `<p class="text-gray-500">No hours recorded yet for this position.</p>`;
+      } else {
+        html += `<table class="w-full border-collapse"><thead><tr class="bg-gray-100"><th class="p-3 text-left">Date</th><th class="p-3 text-right">Hours</th></tr></thead><tbody>`;
+        Object.keys(data).sort().forEach(date => {
+          html += `<tr><td class="p-3 border-t">${date}</td><td class="p-3 border-t text-right font-medium">${data[date]}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+      }
+      dailyDiv.innerHTML = html;
+    });
+  </script>
 </body>
 </html>
