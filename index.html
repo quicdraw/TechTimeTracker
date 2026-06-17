@@ -16,26 +16,40 @@
     <div class="bg-white rounded-xl shadow p-6 mb-8">
       <h3 class="text-lg font-semibold mb-4">Log Your Hours</h3>
       <form id="hoursForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+        
+        <div class="md:col-span-2">
           <label class="block text-sm font-medium mb-1">Your Name</label>
-          <input type="text" id="name" required class="w-full border rounded-lg p-3">
+          <select id="name" required class="w-full border rounded-lg p-3">
+            <option value="">— Select Name —</option>
+            <option value="Patty Beall">Patty Beall</option>
+            <option value="Jonathan Harbaugh">Jonathan Harbaugh</option>
+            <option value="Aiden Ruiz">Aiden Ruiz</option>
+            <option value="Andrew Hurley">Andrew Hurley</option>
+            <option value="Kailey Ruiz">Kailey Ruiz</option>
+            <option value="Isaac Brown">Isaac Brown</option>
+            <option value="Devon Ayers">Devon Ayers</option>
+            <option value="Jordan Canby">Jordan Canby</option>
+            <option value="Allen Hurley">Allen Hurley</option>
+            <option value="Josh Jordan">Josh Jordan</option>
+            <option value="Evan DeGraw">Evan DeGraw</option>
+          </select>
         </div>
+
         <div>
           <label class="block text-sm font-medium mb-1">Date</label>
           <input type="date" id="date" required class="w-full border rounded-lg p-3">
         </div>
+
         <div>
-          <label class="block text-sm font-medium mb-1">Start Time</label>
-          <input type="time" id="start" required class="w-full border rounded-lg p-3">
+          <label class="block text-sm font-medium mb-1" id="hoursLabel">Hours for [Day]</label>
+          <input type="number" id="hours" step="0.25" min="0" required class="w-full border rounded-lg p-3" placeholder="e.g. 5.5">
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">End Time</label>
-          <input type="time" id="end" required class="w-full border rounded-lg p-3">
-        </div>
+
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium mb-1">Role / Notes (e.g. Camera Op - Tuesday Blocking)</label>
-          <input type="text" id="notes" class="w-full border rounded-lg p-3">
+          <label class="block text-sm font-medium mb-1">Role / Notes (e.g. Camera Blocking, General Rehearsal, Prelim Night 1)</label>
+          <input type="text" id="notes" class="w-full border rounded-lg p-3" placeholder="Optional notes">
         </div>
+
         <button type="submit" class="md:col-span-2 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700">
           Submit Hours
         </button>
@@ -45,36 +59,53 @@
     <!-- Personal Totals -->
     <div class="bg-white rounded-xl shadow p-6">
       <h3 class="text-lg font-semibold mb-4">Your Running Total</h3>
-      <p class="text-sm text-gray-500 mb-4">Enter your name above and check back after submissions (or refresh).</p>
       <div id="personalTotal" class="text-4xl font-bold text-green-600">0.0</div>
       <p class="text-sm text-gray-500">hours this event</p>
+      <div id="history" class="mt-4 text-sm"></div>
     </div>
 
     <div class="mt-8 text-center text-sm text-gray-500">
-      <p>Admin: <a href="https://docs.google.com/spreadsheets/..." target="_blank" class="text-blue-600">Full Team Dashboard</a></p>
-      <p class="mt-1">Data saved to Google Sheets • Updates in real-time</p>
+      <p>Data is currently saved locally (for demo). We'll connect to Google Sheets next.</p>
     </div>
   </div>
 
   <script>
-    // TODO: Replace with your Google Form or Apps Script webhook URL
-    const FORM_URL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse"; 
+    const dateInput = document.getElementById('date');
+    const hoursLabel = document.getElementById('hoursLabel');
 
-    document.getElementById('hoursForm').addEventListener('submit', async (e) => {
+    // Update label with day of week when date changes
+    function updateDayLabel() {
+      const dateVal = dateInput.value;
+      if (!dateVal) {
+        hoursLabel.textContent = "Hours for [Day]";
+        return;
+      }
+      const date = new Date(dateVal);
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      hoursLabel.textContent = `Hours for ${days[date.getDay()]}`;
+    }
+
+    dateInput.addEventListener('change', updateDayLabel);
+
+    // Form submission (currently localStorage demo)
+    document.getElementById('hoursForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value.trim();
+      
+      const name = document.getElementById('name').value;
       const date = document.getElementById('date').value;
-      const start = document.getElementById('start').value;
-      const end = document.getElementById('end').value;
+      const hours = parseFloat(document.getElementById('hours').value);
       const notes = document.getElementById('notes').value;
 
-      const startTime = new Date(`${date} ${start}`);
-      const endTime = new Date(`${date} ${end}`);
-      const hours = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(2);
+      if (!name || !date || !hours) return;
 
-      alert(`Logged ${hours} hours for ${name}. (Connect to Google Sheets next step)`);
-      // Reset form
+      // Simple local storage demo (we'll replace with Google Sheets)
+      let records = JSON.parse(localStorage.getItem('misswv_hours') || '[]');
+      records.push({ name, date, hours, notes });
+      localStorage.setItem('misswv_hours', JSON.stringify(records));
+
+      alert(`Logged ${hours} hours for ${name} on ${date}`);
       e.target.reset();
+      updateDayLabel(); // reset label
     });
   </script>
 </body>
